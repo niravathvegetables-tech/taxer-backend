@@ -34,6 +34,7 @@ require_once TAXER_PLUGIN_DIR . 'includes/sales.php';
 require_once TAXER_PLUGIN_DIR . 'includes/stock.php';
 require_once TAXER_PLUGIN_DIR . 'includes/tax.php';
 require_once TAXER_PLUGIN_DIR . 'includes/purchase.php';
+require_once TAXER_PLUGIN_DIR . 'includes/receipt.php';
 
 // ── Activation hook ───────────────────────────────────────────────────────────
 register_activation_hook( __FILE__, 'taxer_activate' );
@@ -448,6 +449,53 @@ add_action(
 					global $wpdb;
 					$controller = new Purchase( $wpdb );
 					return $controller->reactTaxPurchase( $request );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);
+
+/**
+ * POST /taxer/v1/insertreceipt — record a Recipt transaction.
+ */
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/insertreceipt',
+			array(
+				'methods'             => 'POST',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Receipt( $wpdb );
+					return $controller->reactTaxReceipt( $request );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);
+
+
+
+
+/**
+ * GET /taxer/v1/getreceipt — return all tax records.
+ */
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/getreceipt',
+			array(
+				'methods'             => 'GET',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Receipt( $wpdb );
+					return $controller->reactReceiptGet();
 				},
 				'permission_callback' => '__return_true',
 			)

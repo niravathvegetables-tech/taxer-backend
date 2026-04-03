@@ -43,6 +43,7 @@ class Purchase {
 	 * @return WP_REST_Response
 	 */
 	public function reactTaxPurchase( WP_REST_Request $request ) {
+
 		$company_id        = intval( $request->get_param( 'company_id' ) );
 		$transactionamount = sanitize_text_field( $request->get_param( 'sub_total' ) );
 		$tax               = sanitize_text_field( $request->get_param( 'tax_amount' ) );
@@ -72,6 +73,7 @@ class Purchase {
 
 		// Handle both raw JSON string and already-decoded array.
 		$purchases_raw = $request->get_param( 'purchases' );
+
 		$purchases     = is_array( $purchases_raw )
 			? $purchases_raw
 			: json_decode( $purchases_raw, true );
@@ -90,9 +92,13 @@ class Purchase {
 		$errors         = array();
 
 		foreach ( $purchases as $row ) {
+
 			if ( empty( $row['stocks_id'] ) || empty( $row['purchase_amount'] ) ) {
+
 				$errors[] = 'Invalid row: ' . wp_json_encode( $row );
+
 				continue;
+
 			}
 
 			$purchase_data = array(
@@ -113,6 +119,14 @@ class Purchase {
 				$errors[] = $this->wpdb->last_error;
 			}
 		}
+
+
+		$company = $this->model->get_company_by_idee($company_id);
+
+
+		$newcompanyamount=$company->company_amount-$total;
+
+		 $this->model->update_company_amount( $newcompanyamount,$company_id );	
 
 		return new WP_REST_Response(
 			array(

@@ -370,7 +370,7 @@ class Taxer_Controller {
 
 
 
-		$company = $this->model->get_company();
+		$company = $this->model->get_company_by_idee($company_id);
 
 
 		//manage old value before update 
@@ -392,7 +392,7 @@ class Taxer_Controller {
 		if ( false !== $result ) {
 
 
-			$company = $this->model->get_company();
+			$company = $this->model->get_company_by_idee($company_id);
 
 
 			$currentstocks = $this->model->get_by_id_stock($stocks_id);
@@ -403,11 +403,7 @@ class Taxer_Controller {
 
 		$newcompanyamount=$company->company_amount-$oldmanagingamount;
 
-		$this->model->update_company_amount( $newcompanyamount,$company_id );
-
-
-
-		 
+		$this->model->update_company_amount( $newcompanyamount,$company_id );		 
 
 
 			return rest_ensure_response(
@@ -432,7 +428,27 @@ class Taxer_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function reactStockDelete( WP_REST_Request $request ) {
-		$stocks_id = intval( $request->get_param( 'stocks_id' ) );
+
+
+			$stocks_id = intval( $request->get_param( 'stocks_id' ) );
+
+			$currentstocks = $this->model->get_by_id_stock($stocks_id);
+
+
+			$company = $this->model->get_company_by_idee($currentstocks->company_id);
+
+			 $oldmanagingamount=$currentstocks->stocks_price*$currentstocks->stocks_total;
+
+
+			 $newcompanyamount=$company->company_amount+$oldmanagingamount;
+
+
+			 $this->model->update_company_amount( $newcompanyamount,$currentstocks->company_id );	
+
+
+		 
+
+
 		$deleted   = $this->model->delete_stock( $stocks_id );
 
 		if ( $deleted ) {

@@ -36,18 +36,23 @@ class Taxer_Model {
 	/** @var string Table name for purchase records. */
 	private $purchase_table;
 
+	/** @var string Table name for receipt records. */
+	private $receipt_table;
+
 	/**
 	 * Constructor.
 	 *
 	 * @param wpdb $wpdb WordPress database object.
 	 */
 	public function __construct( $wpdb ) {
+
 		$this->wpdb              = $wpdb;
 		$this->company_table     = $wpdb->prefix . 'taxer_company';
-		$this->stocks_table      =  $wpdb->prefix .'taxer_stocks';
+		$this->stocks_table      = $wpdb->prefix .'taxer_stocks';
 		$this->taxes_table       = $wpdb->prefix .'taxer_taxes';
 		$this->transaction_table = $wpdb->prefix .'taxer_transaction';
 		$this->purchase_table    = $wpdb->prefix .'taxer_purchase';
+		$this->receipt_table     = $wpdb->prefix .'taxer_receipt';
 	}
 
 	// ── Company methods ────────────────────────────────────────────────────────
@@ -103,6 +108,26 @@ class Taxer_Model {
 			)
 		);
 	}
+
+public function get_company_by_idee($idee) {
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+    return $this->wpdb->get_row(
+        $this->wpdb->prepare(
+            'SELECT * FROM `' . esc_sql( $this->company_table ) . '` WHERE company_id = %s LIMIT %d',
+            $idee,
+            1
+        )
+    );
+}
+
+
+	public function get_receipt() {
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+    return $this->wpdb->get_results(
+        'SELECT * FROM `' . esc_sql( $this->receipt_table ) . '`'
+    );
+}
+
 
 	/**
 	 * Retrieve all stock records.
@@ -187,15 +212,17 @@ class Taxer_Model {
 			$format[]                   = '%s';
 		}
 
+		if ( ! empty( $data['company_data'] ) ) {
+			$update_data['company_data'] = sanitize_text_field( $data['company_data'] );
+			$format[]                    = '%s';
+		}
+
 		if ( ! empty( $data['tax_id'] ) ) {
 			$update_data['tax_id'] = sanitize_text_field( $data['tax_id'] );
 			$format[]              = '%s';
 		}
 
-		// if ( ! empty( $data['company_data'] ) ) {
-		// 	$update_data['company_data'] = sanitize_text_field( $data['company_data'] );
-		// 	$format[]                    = '%s';
-		// }
+		
 
 
 		if ( ! empty( $data['company_amount'] ) ) {
@@ -366,6 +393,19 @@ public function get_by_id_stock( $id ) {
 			PRIMARY KEY (company_id)
 		) {$charset};";
 		dbDelta( $sql );
+
+		$sql = "CREATE TABLE IF NOT EXISTS {$this->receipt_table} (
+		receipt_id      INT          NOT NULL AUTO_INCREMENT,
+		company_id      VARCHAR(255) NOT NULL,
+		receipt_name    VARCHAR(255) NOT NULL,
+		receipt_amount  VARCHAR(100) NOT NULL,
+		receipt_date    DATE         NOT NULL,
+		PRIMARY KEY (receipt_id)
+		) {$charset};";
+
+		dbDelta( $sql );
+
+			 
 	}
 
 	/**
@@ -383,6 +423,7 @@ public function get_by_id_stock( $id ) {
 				$this->transaction_table,
 				$this->taxes_table,
 				$this->company_table,
+				$this->receipt_table,
 			);
 
 			foreach ( $tables as $table ) {
@@ -584,6 +625,19 @@ public function get_by_id_stock( $id ) {
 			array( 'company_id' => absint( $company_id ) ),
 			$format,
 			array( '%d' )
+		);
+
+	}
+
+
+
+	public function insert_receipt($data){
+
+
+		 	$result = $this->wpdb->insert(
+			$this->receipt_table,
+			$data,
+			array( '%d', '%s', '%s', '%s' )
 		);
 
 	}
