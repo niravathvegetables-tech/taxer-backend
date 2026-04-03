@@ -44,10 +44,10 @@ class Taxer_Model {
 	public function __construct( $wpdb ) {
 		$this->wpdb              = $wpdb;
 		$this->company_table     = $wpdb->prefix . 'taxer_company';
-		$this->stocks_table      = 'stocks';
-		$this->taxes_table       = 'taxes';
-		$this->transaction_table = 'transaction';
-		$this->purchase_table    = 'purchase';
+		$this->stocks_table      =  $wpdb->prefix .'taxer_stocks';
+		$this->taxes_table       = $wpdb->prefix .'taxer_taxes';
+		$this->transaction_table = $wpdb->prefix .'taxer_transaction';
+		$this->purchase_table    = $wpdb->prefix .'taxer_purchase';
 	}
 
 	// ── Company methods ────────────────────────────────────────────────────────
@@ -82,6 +82,7 @@ class Taxer_Model {
 			company_address TEXT         NOT NULL,
 			company_trn     VARCHAR(100) NOT NULL,
 			tax_id          VARCHAR(100) NOT NULL,
+			company_amount          VARCHAR(100) NOT NULL,
 			PRIMARY KEY (company_id)
 		) {$charset};";
 
@@ -134,8 +135,9 @@ class Taxer_Model {
 				'company_address' => sanitize_textarea_field( $data['company_address'] ),
 				'company_trn'     => sanitize_text_field( $data['company_trn'] ),
 				'tax_id'          => 0,
+				'company_amount'          => 0,
 			),
-			array( '%s', '%s', '%s', '%s' )
+			array( '%s', '%s', '%s', '%s','%s')
 		);
 	}
 
@@ -190,8 +192,14 @@ class Taxer_Model {
 			$format[]              = '%s';
 		}
 
-		if ( ! empty( $data['company_data'] ) ) {
-			$update_data['company_data'] = sanitize_text_field( $data['company_data'] );
+		// if ( ! empty( $data['company_data'] ) ) {
+		// 	$update_data['company_data'] = sanitize_text_field( $data['company_data'] );
+		// 	$format[]                    = '%s';
+		// }
+
+
+		if ( ! empty( $data['company_amount'] ) ) {
+			$update_data['company_amount'] = sanitize_text_field( $data['company_amount'] );
 			$format[]                    = '%s';
 		}
 
@@ -277,6 +285,15 @@ class Taxer_Model {
 		);
 	}
 
+public function get_by_id_stock( $id ) {
+    return $this->wpdb->get_row(
+        $this->wpdb->prepare(
+            'SELECT * FROM `' . esc_sql( $this->stocks_table ) . '` WHERE stocks_id = %d',
+            absint( $id )
+        )
+    );
+}
+
 	// ── Activation / deactivation ──────────────────────────────────────────────
 
 	/**
@@ -345,6 +362,7 @@ class Taxer_Model {
 			company_trn     VARCHAR(100) NOT NULL,
 			company_data    VARCHAR(255) NOT NULL,
 			tax_id          VARCHAR(100) NOT NULL DEFAULT '',
+			company_amount          VARCHAR(100) NOT NULL DEFAULT '',
 			PRIMARY KEY (company_id)
 		) {$charset};";
 		dbDelta( $sql );
@@ -547,5 +565,26 @@ class Taxer_Model {
 			array( '%s' ),
 			array( '%d' )
 		);
+	}
+
+
+
+
+
+	public function update_company_amount($newcompanyamount,$company_id){
+
+
+			$update_data['company_amount'] = sanitize_text_field( $newcompanyamount );
+			$format[]                    = '%s';
+		 
+
+		return $this->wpdb->update(
+			$this->company_table,
+			$update_data,
+			array( 'company_id' => absint( $company_id ) ),
+			$format,
+			array( '%d' )
+		);
+
 	}
 }

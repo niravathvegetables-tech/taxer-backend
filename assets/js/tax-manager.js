@@ -132,6 +132,11 @@
 				'</tr>' +
 
 				'<tr>' +
+					'<th scope="row"><label for="m_company_trn">Amount</label></th>' +
+					'<td><input type="text" id="company_amount" class="regular-text" value="' + escHtml( company.company_amount ) + '" maxlength="100" required></td>' +
+				'</tr>' +
+
+				'<tr>' +
 					'<th scope="row"><label for="m_company_trn">Delete Data when deactivating the plugin.</label></th>' +
 					'<td><input type="checkbox" id="m_company_data" class="regular-text" '+cheked+' value="' + escHtml( checkval ) + '" maxlength="100" required></td>' +
 				'</tr>' +
@@ -156,6 +161,8 @@
 		var name      = $.trim( $( '#m_company_name' ).val() );
 		var address   = $.trim( $( '#m_company_address' ).val() );
 		var trn       = $.trim( $( '#m_company_trn' ).val() );
+
+		var company_amount       = $.trim( $( '#company_amount' ).val() );
 
 		var isChecked = $('#m_company_data').is(':checked');
 
@@ -191,6 +198,7 @@
 				company_name:    name,
 				company_address: address,
 				company_trn:     trn,
+				company_amount: company_amount,
 				company_data: m_company_data
 			},
 			success: function ( response ) {

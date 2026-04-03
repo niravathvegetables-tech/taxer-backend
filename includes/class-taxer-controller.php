@@ -142,6 +142,7 @@ class Taxer_Controller {
 					'company_name'    => esc_html( $company->company_name ),
 					'company_address' => esc_textarea( $company->company_address ),
 					'company_trn'     => esc_html( $company->company_trn ),
+					'company_amount'     => esc_html( $company->company_amount ),
 					'company_data'    => esc_html( $company->company_data ),
 				)
 			);
@@ -167,6 +168,7 @@ class Taxer_Controller {
 			'company_name'    => isset( $_POST['company_name'] )    ? wp_unslash( $_POST['company_name'] )    : '',
 			'company_address' => isset( $_POST['company_address'] ) ? wp_unslash( $_POST['company_address'] ) : '',
 			'company_trn'     => isset( $_POST['company_trn'] )     ? wp_unslash( $_POST['company_trn'] )     : '',
+			'company_amount'     => isset( $_POST['company_amount'] )     ? wp_unslash( $_POST['company_amount'] )     : '',
 			'company_data'    => isset( $_POST['company_data'] )    ? wp_unslash( $_POST['company_data'] )    : '',
 		);
 
@@ -197,8 +199,9 @@ class Taxer_Controller {
 		$company_name    = sanitize_text_field( $request->get_param( 'name' ) );
 		$company_address = sanitize_text_field( $request->get_param( 'address' ) );
 		$tax_id          = sanitize_text_field( $request->get_param( 'tax_id' ) );
+		$company_amount          = sanitize_text_field( $request->get_param( 'amount' ) );
 
-		$data = compact( 'company_name', 'company_address', 'company_trn', 'tax_id' );
+		$data = compact( 'company_name', 'company_address', 'company_trn', 'tax_id', 'company_amount' );
 
 		$result = $this->model->update_company( $id, $data );
 
@@ -252,7 +255,34 @@ class Taxer_Controller {
 			}
 		}
 
-		$result = $this->model->insert_stock( $data );
+		
+
+
+
+
+
+		$company = $this->model->get_company();
+
+		 
+		 $stcoktotalcurretnt=$stocks_price*$stocks_total;
+
+
+		$newcompanyamount=$company->company_amount-$stcoktotalcurretnt;
+
+
+		if($newcompanyamount >=1){
+
+			$result = $this->model->insert_stock( $data );
+
+				$this->model->update_company_amount( $newcompanyamount,$company->company_id );
+		}
+
+		
+
+		
+
+
+
 
 		if ( false !== $result ) {
 			return rest_ensure_response(
@@ -337,9 +367,49 @@ class Taxer_Controller {
 			}
 		}
 
+
+
+
+		$company = $this->model->get_company();
+
+
+		//manage old value before update 
+
+		$currentstocks = $this->model->get_by_id_stock($stocks_id);
+
+
+		 $oldmanagingamount=$currentstocks->stocks_price*$currentstocks->stocks_total;
+
+
+		$newcompanyamount=$company->company_amount+$oldmanagingamount;
+
+
+		$this->model->update_company_amount( $newcompanyamount,$company_id );	
+
+
 		$result = $this->model->update_stock( $stocks_id, $data );
 
 		if ( false !== $result ) {
+
+
+			$company = $this->model->get_company();
+
+
+			$currentstocks = $this->model->get_by_id_stock($stocks_id);
+
+
+		 $oldmanagingamount=$currentstocks->stocks_price*$currentstocks->stocks_total;
+
+
+		$newcompanyamount=$company->company_amount-$oldmanagingamount;
+
+		$this->model->update_company_amount( $newcompanyamount,$company_id );
+
+
+
+		 
+
+
 			return rest_ensure_response(
 				array(
 					'success' => true,
