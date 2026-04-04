@@ -502,3 +502,50 @@ add_action(
 		);
 	}
 );
+
+
+
+/**
+ * POST /taxer/v1/updatereceipt — record a Recipt transaction.
+ */
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/updatereceipt',
+			array(
+				'methods'             => 'POST',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Receipt( $wpdb );
+					return $controller->reactTaxReceiptUpdate( $request );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);
+
+
+/**
+ * POST /taxer/v1/deletereceipt — delete a receipt record.
+ */
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/deletereceipt',
+			array(
+				'methods'             => 'POST',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Receipt( $wpdb );
+					return $controller->reactReceiptDelete( $request );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);

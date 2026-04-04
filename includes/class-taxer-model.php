@@ -129,6 +129,17 @@ public function get_company_by_idee($idee) {
 }
 
 
+public function get_receipt_by_idee($idee) {
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+    return $this->wpdb->get_row(
+        $this->wpdb->prepare(
+            'SELECT * FROM `' . esc_sql( $this->receipt_table ) . '` WHERE receipt_id = %s LIMIT %d',
+            $idee,
+            1
+        )
+    );
+}
+
 	/**
 	 * Retrieve all stock records.
 	 *
@@ -641,4 +652,47 @@ public function get_by_id_stock( $id ) {
 		);
 
 	}
-}
+ 
+
+
+
+
+/**
+	 * Update an existing Recipt category record.
+	 *
+	 * @param int   $receipt_id Tax primary key.
+	 * @param array $data   Column => value pairs.
+	 * @return int|false
+	 */
+	public function update_reciept( $receipt_id, array $data ) {
+
+
+
+		$result = $this->wpdb->update(
+			$this->receipt_table,
+			$data,
+			array( 'receipt_id' => $receipt_id ),
+			array( '%s', '%s', '%s', '%s'),
+			array( '%d' )
+		);
+
+		if ( false === $result ) {
+			error_log( 'Reciept update_tax failed: ' . $this->wpdb->last_error );
+		}
+
+		return $result;
+	}
+
+
+
+		public function delete_receipt( $receipt_id ) {
+
+		return $this->wpdb->delete(
+			$this->receipt_table,
+			array( 'receipt_id' => intval( $receipt_id ) )
+		);
+	}
+
+
+
+} //end of classs paranthesis
