@@ -39,6 +39,9 @@ class Taxer_Model {
 	/** @var string Table name for receipt records. */
 	private $receipt_table;
 
+	/** @var string Table name for payment records. */
+	private $payment_table;
+
 	/**
 	 * Constructor.
 	 *
@@ -47,12 +50,13 @@ class Taxer_Model {
 	public function __construct( $wpdb ) {
 
 		$this->wpdb              = $wpdb;
-		$this->company_table     = $wpdb->prefix . 'taxer_company';
+		$this->company_table     = $wpdb->prefix .'taxer_company';
 		$this->stocks_table      = $wpdb->prefix .'taxer_stocks';
 		$this->taxes_table       = $wpdb->prefix .'taxer_taxes';
 		$this->transaction_table = $wpdb->prefix .'taxer_transaction';
 		$this->purchase_table    = $wpdb->prefix .'taxer_purchase';
 		$this->receipt_table     = $wpdb->prefix .'taxer_receipt';
+		$this->payment_table     = $wpdb->prefix .'taxer_payment';
 	}
 
 	// ── Company methods ────────────────────────────────────────────────────────
@@ -405,6 +409,9 @@ public function get_by_id_stock( $id ) {
 		) {$charset};";
 		dbDelta( $sql );
 
+
+		// Recept table.
+
 		$sql = "CREATE TABLE IF NOT EXISTS {$this->receipt_table} (
 		receipt_id      INT          NOT NULL AUTO_INCREMENT,
 		company_id      VARCHAR(255) NOT NULL,
@@ -415,6 +422,20 @@ public function get_by_id_stock( $id ) {
 		) {$charset};";
 
 		dbDelta( $sql );
+
+		// Payment table.
+		$sql = "CREATE TABLE IF NOT EXISTS {$this->payment_table} (
+		payment_id      INT          NOT NULL AUTO_INCREMENT,
+		company_id      VARCHAR(255) NOT NULL,
+		payment_name    VARCHAR(255) NOT NULL,
+		payment_amount  VARCHAR(100) NOT NULL,
+		payment_date    DATE         NOT NULL,
+		PRIMARY KEY (payment_id)
+		) {$charset};";
+
+		dbDelta( $sql );
+
+		 
 
 			 
 	}
@@ -435,6 +456,7 @@ public function get_by_id_stock( $id ) {
 				$this->taxes_table,
 				$this->company_table,
 				$this->receipt_table,
+				$this->payment_table,
 			);
 
 			foreach ( $tables as $table ) {
@@ -647,6 +669,17 @@ public function get_by_id_stock( $id ) {
 
 		 	$result = $this->wpdb->insert(
 			$this->receipt_table,
+			$data,
+			array( '%d', '%s', '%s', '%s' )
+		);
+
+	}
+
+	public function insert_payment($data){
+
+
+		 	$result = $this->wpdb->insert(
+			$this->payment_table,
 			$data,
 			array( '%d', '%s', '%s', '%s' )
 		);

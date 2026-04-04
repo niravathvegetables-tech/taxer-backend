@@ -35,6 +35,7 @@ require_once TAXER_PLUGIN_DIR . 'includes/stock.php';
 require_once TAXER_PLUGIN_DIR . 'includes/tax.php';
 require_once TAXER_PLUGIN_DIR . 'includes/purchase.php';
 require_once TAXER_PLUGIN_DIR . 'includes/receipt.php';
+require_once TAXER_PLUGIN_DIR . 'includes/payment.php';
 
 // ── Activation hook ───────────────────────────────────────────────────────────
 register_activation_hook( __FILE__, 'taxer_activate' );
@@ -543,6 +544,28 @@ add_action(
 					global $wpdb;
 					$controller = new Receipt( $wpdb );
 					return $controller->reactReceiptDelete( $request );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);
+
+
+
+
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/addpayment',
+			array(
+				'methods'             => 'POST',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Payment( $wpdb );
+					return $controller->reactTaxPayment( $request );
 				},
 				'permission_callback' => '__return_true',
 			)

@@ -263,11 +263,17 @@ class Taxer_Controller {
 
 		$company = $this->model->get_company();
 
+		if(!empty($company)){
+
+
+		
 		 
 		 $stcoktotalcurretnt=$stocks_price*$stocks_total;
 
 
 		$newcompanyamount=$company->company_amount-$stcoktotalcurretnt;
+
+
 
 
 		if($newcompanyamount >=1){
@@ -292,6 +298,18 @@ class Taxer_Controller {
 				)
 			);
 		}
+
+	}else{
+
+		return rest_ensure_response(
+				array(
+					'success' => true,
+					'message' => 'Please allocate Company amount.',
+				)
+			);
+
+
+	}
 
 		return new WP_Error(
 			'db_error',
