@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Class Receipt
  */
-class Payment {
+class Contra {
 
 	/** @var Taxer_Model */
 	private $model;
@@ -31,31 +31,31 @@ class Payment {
 	}
 
 
-	public function reactTaxPayment( WP_REST_Request $request ) {
+	public function reactContraPayment( WP_REST_Request $request ) {
 
 		$company_id     = intval( $request->get_param( 'company_id' ) );
-		$payment_name   = sanitize_text_field( $request->get_param( 'payment_name' ) );
-		$payment_amount = sanitize_text_field( $request->get_param( 'payment_amount' ) );
-		$payment_date   = sanitize_text_field( $request->get_param( 'payment_date' ) );
+		$contra_name   = sanitize_text_field( $request->get_param( 'contra_name' ) );
+		$contra_amount = sanitize_text_field( $request->get_param( 'contra_amount' ) );
+		$contra_date   = sanitize_text_field( $request->get_param( 'contra_date' ) );
 
 		$data = array(
 			'company_id'     => $company_id,
-			'payment_name'   => $payment_name,
-			'payment_amount' => $payment_amount,
-			'payment_date'   => $payment_date,
+			'contra_name'   => $contra_name,
+			'contra_amount' => $contra_amount,
+			'contra_date'   => $contra_date,
 		);
 
-		$result = $this->model->insert_payment( $data );
+		$result = $this->model->insert_contra( $data );
 
 		$company          = $this->model->get_company_by_idee( $company_id );
-		$newcompanyamount = $company->company_amount - $payment_amount;
+		$newcompanyamount = $company->company_amount - $contra_amount;
 		$this->model->update_company_amount( $newcompanyamount, $company_id );
 
 		if ( false !== $result ) {
 			return rest_ensure_response(
 				array(
 					'success' => true,
-					'message' => 'Payment added successfully.',
+					'message' => 'Bank added successfully.',
 				)
 			);
 		}
@@ -68,14 +68,14 @@ class Payment {
 	}
 
 
-	public function reactPaymentGet() {
+	public function reactContraGet() {
 
-		$payme = $this->model->get_payment();
+		$payme = $this->model->get_contra();
 
 		if ( $payme ) {
 			return rest_ensure_response(
 				array(
-					'payment' => $payme,
+					'contra' => $payme,
 				)
 			);
 		} else {
@@ -84,17 +84,17 @@ class Payment {
 	}
 
 
-	public function reactTaxPaymentUpdate( WP_REST_Request $request ) {
+	public function reactContraPaymentUpdate( WP_REST_Request $request ) {
 
 		$company_id     = intval( $request->get_param( 'company_id' ) );
-		$payment_id     = intval( $request->get_param( 'payment_id' ) );
-		$payment_name   = sanitize_text_field( $request->get_param( 'payment_name' ) );
-		$payment_amount = sanitize_text_field( $request->get_param( 'payment_amount' ) );
-		$payment_date   = sanitize_text_field( $request->get_param( 'payment_date' ) );
+		$contra_id     = intval( $request->get_param( 'contra_id' ) );
+		$contra_name   = sanitize_text_field( $request->get_param( 'contra_name' ) );
+		$contra_amount = sanitize_text_field( $request->get_param( 'contra_amount' ) );
+		$contra_date   = sanitize_text_field( $request->get_param( 'contra_date' ) );
 
 
 		$company      = $this->model->get_company_by_idee( $company_id );
-		$prev_payment = $this->model->get_payment_by_idee( $payment_id );
+		$prev_payment = $this->model->get_contra_by_idee( $contra_id );
 
 		if ( ! $company || ! $prev_payment ) {
 			return rest_ensure_response(
@@ -106,28 +106,28 @@ class Payment {
 		}
 
 		// Subtract old amount from company
-		$lesswitholdamount = $company->company_amount + $prev_payment->payment_amount;
+		$lesswitholdamount = $company->company_amount + $prev_payment->contra_amount;
 		$this->model->update_company_amount( $lesswitholdamount, $company_id );
 
 		$data = array(
 			'company_id'     => $company_id,
-			'payment_name'   => $payment_name,
-			'payment_amount' => $payment_amount,
-			'payment_date'   => $payment_date,
+			'contra_name'   => $contra_name,
+			'contra_amount' => $contra_amount,
+			'contra_date'   => $contra_date,
 		);
 
-		$result = $this->model->update_payment( $payment_id, $data );
+		$result = $this->model->update_contra( $contra_id, $data );
 
 		// Add new amount to company
 		$company          = $this->model->get_company_by_idee( $company_id );
-		$newaddedamount   = $company->company_amount - $payment_amount;
+		$newaddedamount   = $company->company_amount - $contra_amount;
 		$this->model->update_company_amount( $newaddedamount, $company_id );
 
 		if ( false !== $result ) {
 			return rest_ensure_response(
 				array(
 					'success' => true,
-					'message' => 'Receipt updated successfully.',
+					'message' => 'Bank updated successfully.',
 				)
 			);
 		}
@@ -140,15 +140,15 @@ class Payment {
 	}
 
 
-	public function reactPaymentDelete( WP_REST_Request $request ) {
+	public function reactContraDelete( WP_REST_Request $request ) {
 
 		$body = $request->get_json_params();
 
 		$company_id = intval( $body['company_id'] );
-		$payment_id = intval( $body['payment_id'] );
+		$contra_id = intval( $body['contra_id'] );
 
 		$company      = $this->model->get_company_by_idee( $company_id );
-		$prev_payment = $this->model->get_payment_by_idee( $payment_id );
+		$prev_payment = $this->model->get_contra_by_idee( $contra_id );
 
 		if ( ! $company || ! $prev_payment ) {
 			return rest_ensure_response(
@@ -159,11 +159,11 @@ class Payment {
 			);
 		}
 
-		// Subtract deleted receipt amount from company
-		$lesswitholdamount = $company->company_amount + $prev_payment->payment_amount;
+		// add deleted receipt amount from company
+		$lesswitholdamount = $company->company_amount + $prev_payment->contra_amount;
 		$this->model->update_company_amount( $lesswitholdamount, $company_id );
 
-		$deleted = $this->model->delete_payment( $payment_id );
+		$deleted = $this->model->delete_contra( $contra_id );
 
 		if ( $deleted ) {
 			return rest_ensure_response(

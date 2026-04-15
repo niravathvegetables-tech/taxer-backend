@@ -565,4 +565,21 @@ class Taxer_Controller {
 
 		return rest_ensure_response( array( 'success' => false, 'message' => 'Delete failed' ) );
 	}
+
+
+
+
+
+public function reactPaymentGet() {
+		$payment = $this->model->get_payment();
+
+		return rest_ensure_response(
+			array(
+				'payment' => $payment,
+			)
+		);
+	}
+
+
+
 }

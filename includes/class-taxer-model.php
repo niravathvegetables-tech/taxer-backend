@@ -42,6 +42,15 @@ class Taxer_Model {
 	/** @var string Table name for payment records. */
 	private $payment_table;
 
+	/** @var string Table name for bank records. */
+
+	private $contra_table;
+
+	/** @var string Table name for bank records. */
+
+	private $sales_table;
+
+
 	/**
 	 * Constructor.
 	 *
@@ -57,6 +66,9 @@ class Taxer_Model {
 		$this->purchase_table    = $wpdb->prefix .'taxer_purchase';
 		$this->receipt_table     = $wpdb->prefix .'taxer_receipt';
 		$this->payment_table     = $wpdb->prefix .'taxer_payment';
+		$this->contra_table     = $wpdb->prefix .'taxer_contra';
+		$this->sales_table     = $wpdb->prefix .'taxer_sales';
+
 	}
 
 	// ── Company methods ────────────────────────────────────────────────────────
@@ -125,6 +137,21 @@ public function get_company_by_idee($idee) {
 }
 
 
+	public function get_payment() {
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+    return $this->wpdb->get_results(
+        'SELECT * FROM `' . esc_sql( $this->payment_table ) . '`'
+    );
+}
+
+	public function get_contra() {
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+    return $this->wpdb->get_results(
+        'SELECT * FROM `' . esc_sql( $this->contra_table ) . '`'
+    );
+}
+
+
 	public function get_receipt() {
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
     return $this->wpdb->get_results(
@@ -133,11 +160,35 @@ public function get_company_by_idee($idee) {
 }
 
 
+
 public function get_receipt_by_idee($idee) {
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
     return $this->wpdb->get_row(
         $this->wpdb->prepare(
             'SELECT * FROM `' . esc_sql( $this->receipt_table ) . '` WHERE receipt_id = %s LIMIT %d',
+            $idee,
+            1
+        )
+    );
+}
+
+
+public function get_payment_by_idee($idee) {
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+    return $this->wpdb->get_row(
+        $this->wpdb->prepare(
+            'SELECT * FROM `' . esc_sql( $this->payment_table ) . '` WHERE payment_id = %s LIMIT %d',
+            $idee,
+            1
+        )
+    );
+}
+
+public function get_contra_by_idee($idee) {
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+    return $this->wpdb->get_row(
+        $this->wpdb->prepare(
+            'SELECT * FROM `' . esc_sql( $this->contra_table ) . '` WHERE contra_id = %s LIMIT %d',
             $idee,
             1
         )
@@ -375,6 +426,20 @@ public function get_by_id_stock( $id ) {
 		) {$charset};";
 		dbDelta( $sql );
 
+
+		$sql = "CREATE TABLE IF NOT EXISTS {$this->sales_table} (
+			sales_id        INT          NOT NULL AUTO_INCREMENT,
+			transaction_id     INT          NOT NULL,
+			stocks_id          INT          NOT NULL,
+			sales_amount    TEXT         NOT NULL,
+			sales_count     TEXT         NOT NULL,
+			sales_item_type TEXT         NOT NULL,
+			sales_total     VARCHAR(100) NOT NULL,
+			date               VARCHAR(100) NOT NULL,
+			PRIMARY KEY (sales_id)
+		) {$charset};";
+		dbDelta( $sql );
+
 		// Transaction table.
 		$sql = "CREATE TABLE IF NOT EXISTS {$this->transaction_table} (
 			transaction_id    INT          NOT NULL AUTO_INCREMENT,
@@ -433,6 +498,16 @@ public function get_by_id_stock( $id ) {
 		PRIMARY KEY (payment_id)
 		) {$charset};";
 
+		// Bank table.
+		$sql = "CREATE TABLE IF NOT EXISTS {$this->contra_table} (
+		contra_id      INT          NOT NULL AUTO_INCREMENT,
+		company_id      VARCHAR(255) NOT NULL,
+		contra_name    VARCHAR(255) NOT NULL,
+		contra_amount  VARCHAR(100) NOT NULL,
+		contra_date    DATE         NOT NULL,
+		PRIMARY KEY (contra_id)
+		) {$charset};";
+
 		dbDelta( $sql );
 
 		 
@@ -457,6 +532,7 @@ public function get_by_id_stock( $id ) {
 				$this->company_table,
 				$this->receipt_table,
 				$this->payment_table,
+				$this->contra_table,
 			);
 
 			foreach ( $tables as $table ) {
@@ -526,6 +602,10 @@ public function get_by_id_stock( $id ) {
 			'SELECT * FROM `' . esc_sql( $this->taxes_table ) . '`'
 		);
 	}
+
+
+
+	 
 
 	/**
 	 * Update an existing tax category record.
@@ -606,6 +686,26 @@ public function get_by_id_stock( $id ) {
 	}
 
 	/**
+	 * Insert a sales record and adjust stock levels.
+	 *
+	 * @param array $data          Purchase column => value pairs.
+	 * @param int   $stocks_id     Stock item to adjust.
+	 * @param int   $sales_count Quantity to add to stock.
+	 * @return int|false
+	 */
+	public function sales( array $data, $stocks_id, $sales_count ) {
+		$result = $this->wpdb->insert(
+			$this->sales_table,
+			$data,
+			array( '%d', '%d', '%s', '%s', '%s', '%s', '%s' )
+		);
+
+		$this->adjuststocksales( $stocks_id, $sales_count );
+
+		return $result;
+	}
+
+	/**
 	 * Adjust the total quantity of a stock item.
 	 *
 	 * @param int   $stocks_id     Stock primary key.
@@ -641,6 +741,43 @@ public function get_by_id_stock( $id ) {
 		);
 	}
 
+
+
+	/**
+	 * Adjust the total quantity of a stock item.
+	 *
+	 * @param int   $stocks_id     Stock primary key.
+	 * @param float $purchase_count Quantity to add (negative to subtract).
+	 * @return int|false
+	 */
+	public function adjuststocksales( $stocks_id, $sales_count ) {
+		$stock = $this->wpdb->get_row(
+			$this->wpdb->prepare(
+				'SELECT * FROM `' . esc_sql( $this->stocks_table ) . '` WHERE stocks_id = %d',
+				$stocks_id
+			)
+		);
+
+		if ( ! $stock ) {
+			error_log( 'Taxer adjuststock: stock not found for ID ' . $stocks_id );
+			return false;
+		}
+
+		$new_total = floatval( $stock->stocks_total ) - floatval( $sales_count );
+
+		if ( $new_total < 0 ) {
+			error_log( 'Taxer adjuststock: insufficient stock for ID ' . $stocks_id );
+			return false;
+		}
+
+		return $this->wpdb->update(
+			$this->stocks_table,
+			array( 'stocks_total' => $new_total ),
+			array( 'stocks_id'    => $stocks_id ),
+			array( '%s' ),
+			array( '%d' )
+		);
+	}
 
 
 
@@ -685,6 +822,17 @@ public function get_by_id_stock( $id ) {
 		);
 
 	}
+
+	public function insert_contra($data){
+
+
+		 	$result = $this->wpdb->insert(
+			$this->contra_table,
+			$data,
+			array( '%d', '%s', '%s', '%s' )
+		);
+
+	}
  
 
 
@@ -717,12 +865,67 @@ public function get_by_id_stock( $id ) {
 	}
 
 
+	public function update_payment( $payment_id, array $data ) {
+
+
+
+		$result = $this->wpdb->update(
+			$this->payment_table,
+			$data,
+			array( 'payment_id' => $payment_id ),
+			array( '%s', '%s', '%s', '%s'),
+			array( '%d' )
+		);
+
+		if ( false === $result ) {
+			error_log( 'Payment update_tax failed: ' . $this->wpdb->last_error );
+		}
+
+		return $result;
+	}
+
+	public function update_contra( $contra_id, array $data ) {
+
+
+
+		$result = $this->wpdb->update(
+			$this->contra_table,
+			$data,
+			array( 'contra_id' => $contra_id ),
+			array( '%s', '%s', '%s', '%s'),
+			array( '%d' )
+		);
+
+		if ( false === $result ) {
+			error_log( 'Contra update_tax failed: ' . $this->wpdb->last_error );
+		}
+
+		return $result;
+	}
+
+
 
 		public function delete_receipt( $receipt_id ) {
 
 		return $this->wpdb->delete(
 			$this->receipt_table,
 			array( 'receipt_id' => intval( $receipt_id ) )
+		);
+	}
+
+	public function delete_payment( $payment_id ) {
+
+		return $this->wpdb->delete(
+			$this->payment_table,
+			array( 'payment_id' => intval( $payment_id ) )
+		);
+	}
+
+		public function delete_contra( $contra_id ) {
+
+		return $this->wpdb->delete(
+			$this->contra_table,
+			array( 'contra_id' => intval( $contra_id ) )
 		);
 	}
 

@@ -36,6 +36,7 @@ require_once TAXER_PLUGIN_DIR . 'includes/tax.php';
 require_once TAXER_PLUGIN_DIR . 'includes/purchase.php';
 require_once TAXER_PLUGIN_DIR . 'includes/receipt.php';
 require_once TAXER_PLUGIN_DIR . 'includes/payment.php';
+require_once TAXER_PLUGIN_DIR . 'includes/contra.php';
 
 // ── Activation hook ───────────────────────────────────────────────────────────
 register_activation_hook( __FILE__, 'taxer_activate' );
@@ -458,6 +459,28 @@ add_action(
 );
 
 /**
+ * POST /taxer/v1/sales — record a sales transaction.
+ */
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/sales',
+			array(
+				'methods'             => 'POST',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Sales( $wpdb );
+					return $controller->reactTaxSales( $request );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);
+
+/**
  * POST /taxer/v1/insertreceipt — record a Recipt transaction.
  */
 add_action(
@@ -566,6 +589,158 @@ add_action(
 					global $wpdb;
 					$controller = new Payment( $wpdb );
 					return $controller->reactTaxPayment( $request );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);
+
+
+
+
+
+/**
+ * GET /taxer/v1/getpayment — return all tax records.
+ */
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/getpayment',
+			array(
+				'methods'             => 'GET',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Payment( $wpdb );
+					return $controller->reactPaymentGet();
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);
+
+
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/updatepayment',
+			array(
+				'methods'             => 'POST',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Payment( $wpdb );
+					return $controller->reactTaxPaymentUpdate( $request );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);
+
+
+/**
+ * POST /taxer/v1/deletepayment — delete a receipt record.
+ */
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/deletepayment',
+			array(
+				'methods'             => 'POST',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Payment( $wpdb );
+					return $controller->reactPaymentDelete( $request );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);
+
+
+/**Bank transactions
+ * POST and GET /taxer/v1/deletepayment — delete a receipt record.
+ */
+
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/addcontra',
+			array(
+				'methods'             => 'POST',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Contra( $wpdb );
+					return $controller->reactContraPayment( $request );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);
+
+
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/updatecontra',
+			array(
+				'methods'             => 'POST',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Contra( $wpdb );
+					return $controller->reactContraPaymentUpdate( $request );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);
+
+
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/getcontra',
+			array(
+				'methods'             => 'GET',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Contra( $wpdb );
+					return $controller->reactContraGet();
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);
+
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/deletecontra',
+			array(
+				'methods'             => 'POST',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Contra( $wpdb );
+					return $controller->reactContraDelete( $request );
 				},
 				'permission_callback' => '__return_true',
 			)
