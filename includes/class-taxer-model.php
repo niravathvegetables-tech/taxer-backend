@@ -498,6 +498,8 @@ public function get_by_id_stock( $id ) {
 		PRIMARY KEY (payment_id)
 		) {$charset};";
 
+		dbDelta( $sql );
+
 		// Bank table.
 		$sql = "CREATE TABLE IF NOT EXISTS {$this->contra_table} (
 		contra_id      INT          NOT NULL AUTO_INCREMENT,
