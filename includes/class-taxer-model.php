@@ -207,6 +207,35 @@ public function get_contra_by_idee($idee) {
 		);
 	}
 
+
+/***
+ * 
+ * Get report of purchase 
+ * 
+ * 
+ * 
+ */
+
+public function get_prchase_report() {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		return $this->wpdb->get_results(
+			'SELECT * FROM `' . esc_sql( $this->purchase_table ) . '`'
+		);
+	}
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
 	/**
 	 * Insert a new company record.
 	 * Data is sanitised here so callers never need to remember.
@@ -930,6 +959,10 @@ public function get_by_id_stock( $id ) {
 			array( 'contra_id' => intval( $contra_id ) )
 		);
 	}
+
+
+
+
 
 
 

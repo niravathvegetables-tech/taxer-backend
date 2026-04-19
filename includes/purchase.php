@@ -138,4 +138,28 @@ class Purchase {
 			200
 		);
 	}
+
+
+
+
+
+	public function GetPurchaseDetails(WP_REST_Request $request){
+
+
+
+		$report = $this->model->get_prchase_report();
+
+		return rest_ensure_response(
+			array(
+				'getreport' => $report,
+			)
+		);
+
+	}
+
+
+
+
+
+
 }

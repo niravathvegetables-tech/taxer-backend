@@ -747,3 +747,26 @@ add_action(
 		);
 	}
 );
+
+
+
+////////rreports generation///////////////////
+
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/getreportpurchase',
+			array(
+				'methods'             => 'GET',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Purchase( $wpdb );
+					return $controller->GetPurchaseDetails($request );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);
