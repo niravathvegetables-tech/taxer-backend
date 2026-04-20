@@ -752,6 +752,8 @@ add_action(
 
 ////////rreports generation///////////////////
 
+///purchase
+
 add_action(
 	'rest_api_init',
 	function () {
@@ -764,6 +766,27 @@ add_action(
 					global $wpdb;
 					$controller = new Purchase( $wpdb );
 					return $controller->GetPurchaseDetails($request );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);
+
+///sales
+
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/getreportsales',
+			array(
+				'methods'             => 'GET',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Sales( $wpdb );
+					return $controller->GetSalesDetails($request );
 				},
 				'permission_callback' => '__return_true',
 			)

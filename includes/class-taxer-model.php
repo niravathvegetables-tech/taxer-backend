@@ -216,7 +216,7 @@ public function get_contra_by_idee($idee) {
  * 
  */
 
-public function get_prchase_report() {
+public function get_purchase_report() {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		return $this->wpdb->get_results(
 			'SELECT * FROM `' . esc_sql( $this->purchase_table ) . '`'
@@ -229,7 +229,20 @@ public function get_prchase_report() {
 
 
 
+/***
+ * 
+ * Get report of sales 
+ * 
+ * 
+ * 
+ */
 
+public function get_sales_report() {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		return $this->wpdb->get_results(
+			'SELECT * FROM `' . esc_sql( $this->sales_table ) . '`'
+		);
+	}
 
 
 

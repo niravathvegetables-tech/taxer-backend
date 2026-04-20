@@ -132,4 +132,23 @@ class Sales {
 			200
 		);
 	}
+
+
+
+
+		public function GetSalesDetails(WP_REST_Request $request){
+
+
+
+		$report = $this->model->get_sales_report();
+
+		return rest_ensure_response(
+			array(
+				'getreport' => $report,
+			)
+		);
+
+	}
+
+
 }

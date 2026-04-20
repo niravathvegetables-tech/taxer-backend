@@ -147,7 +147,7 @@ class Purchase {
 
 
 
-		$report = $this->model->get_prchase_report();
+		$report = $this->model->get_purchase_report();
 
 		return rest_ensure_response(
 			array(
