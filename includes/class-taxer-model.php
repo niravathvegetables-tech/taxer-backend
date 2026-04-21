@@ -195,6 +195,51 @@ public function get_contra_by_idee($idee) {
     );
 }
 
+
+public function check_get_sales_report($idee) {
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+    return $this->wpdb->get_row(
+        $this->wpdb->prepare(
+            'SELECT * FROM `' . esc_sql( $this->sales_table ) . '` WHERE transaction_id = %s LIMIT %d',
+            $idee,
+            1
+        )
+    );
+}
+
+
+
+public function check_get_purchase_report($idee) {
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+    return $this->wpdb->get_row(
+        $this->wpdb->prepare(
+            'SELECT * FROM `' . esc_sql( $this->purchase_table ) . '` WHERE transaction_id = %s LIMIT %d',
+            $idee,
+            1
+        )
+    );
+}
+
+	
+	/**
+	 * Retrieve all Repoets records.
+	 *
+	 * @return array
+	 */
+
+
+
+	public function generatereport() {
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+    return $this->wpdb->get_results(
+        'SELECT * FROM `' . esc_sql( $this->transaction_table ) . '`'
+    );
+}
+
+
+
+
+
 	/**
 	 * Retrieve all stock records.
 	 *

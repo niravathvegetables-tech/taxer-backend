@@ -86,6 +86,73 @@ class Taxer_Controller {
 		);
 	}
 
+/**
+	 * Return company reportdata for the React frontend.
+	 *
+	 * @return WP_REST_Response
+	 */
+
+	private function checktype($re){
+
+
+			$sales = $this->model->check_get_sales_report($re);
+
+			if(!empty($sales)){
+
+				return 'sales';
+
+			}
+
+			$purchase = $this->model->check_get_purchase_report($re);
+
+
+			if(!empty($purchase)){
+
+				return 'purchase';
+
+			}
+
+
+	}
+
+
+	public function FullReport(WP_REST_Request $request) {
+
+		$report = $this->model->generatereport();
+
+		
+
+
+		$fullreport=array();
+
+		foreach($report as $rep){
+
+
+			$fullreportpre=array();
+
+			//print_r($rep->transaction_id);
+
+			  $checktypeoftransaction=$this->checktype($rep->transaction_id);
+
+			  $fullreportpre['data']=$rep;
+
+			  $fullreportpre['type']=$checktypeoftransaction;
+
+			  $fullreport[]=$fullreportpre;
+
+		}
+
+		//print_r($report);
+ 
+
+		return rest_ensure_response(
+			array(
+				'reports' => $fullreport,
+			)
+		);
+	}
+
+
 	// ── Private helpers ────────────────────────────────────────────────────────
 
 	/**

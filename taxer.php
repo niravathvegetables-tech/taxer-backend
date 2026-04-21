@@ -793,3 +793,24 @@ add_action(
 		);
 	}
 );
+
+//full report
+
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'taxer/v1',
+			'/fullreport',
+			array(
+				'methods'             => 'GET',
+				'callback'            => function ( WP_REST_Request $request ) {
+					global $wpdb;
+					$controller = new Taxer_Controller( $wpdb );
+					return $controller->FullReport($request );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+);
