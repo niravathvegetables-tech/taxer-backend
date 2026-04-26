@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Class Receipt
  */
-class Receipt {
+class Taxer_Receipt {
 
 	/** @var Taxer_Model */
 	private $model;

@@ -1,6 +1,6 @@
 <?php
 /**
- * Tax handler for Taxer plugin.
+ * Stock handler for Taxer plugin.
  *
  * @package Taxer
  */
@@ -10,9 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class Tax
+ * Class Stock
  */
-class Tax {
+class Taxer_Stock {
 
 	/** @var Taxer_Model */
 	private $model;

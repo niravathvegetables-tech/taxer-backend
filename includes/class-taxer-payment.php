@@ -1,6 +1,6 @@
 <?php
 /**
- * Receipt handler for Taxer plugin.
+ * Payment handler for Taxer plugin.
  *
  * @package Taxer
  */
@@ -10,9 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class Receipt
+ * Class Taxer_Payment
  */
-class Payment {
+class Taxer_Payment {
 
 	/** @var Taxer_Model */
 	private $model;

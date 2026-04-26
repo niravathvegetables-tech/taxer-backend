@@ -1,29 +1,35 @@
 === Taxer ===
 Contributors: rajmohan
-Tags: tax, vat, trn, invoice, company
+Tags: tax, vat, accounting, invoice, stock management
 Requires at least: 5.8
-Tested up to: 6.5
+Tested up to: 6.7
 Requires PHP: 7.4
 Stable tag: 1.0.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A simple Tax Manager plugin to manage your company details and tax registration number from the WordPress admin.
+A complete Tax Manager plugin to manage company details, stock, purchases, sales, receipts, payments, and VAT/tax records from the WordPress admin.
 
 == Description ==
 
-Taxer is a lightweight Tax Manager plugin that allows business owners to store and manage their company details — including company name, address, and Tax Registration Number (TRN) — directly from the WordPress admin dashboard.
+Taxer is a full-featured Tax Manager plugin that allows business owners to manage their accounting records directly from the WordPress admin dashboard.
 
 **Features:**
 
-* First-time company setup wizard
-* Edit company details via a clean modal dialog
-* Secure AJAX-powered updates with nonce verification
-* Capability-checked — only administrators can access the plugin
-* Clean, responsive admin UI using native WordPress styles
+* Company setup wizard with TRN and VAT/tax configuration
+* Stock management — add, edit, and delete stock items
+* Purchase recording with automatic stock level adjustments
+* Sales recording with tax calculation
+* Receipt and Payment voucher management
+* Bank/Contra entry management
+* Full transaction report with input/output tax summary
+* Secure REST API with nonce-protected write operations
+* Capability-checked — only administrators can modify data
+* React-powered frontend via shortcode `[taxer_app]`
+* Clean, responsive UI
 * Translation-ready (i18n)
 
-This plugin is ideal for businesses that need to store their company and VAT/TRN details in one place, ready to use across invoices and tax documents.
+All data is stored locally in your WordPress database. No data is sent to any external server.
 
 == Installation ==
 
@@ -33,6 +39,7 @@ This plugin is ideal for businesses that need to store their company and VAT/TRN
 4. Click **Install Now**, then **Activate Plugin**.
 5. Navigate to **Tax Manager** in the left admin menu.
 6. Fill in your company details on the setup screen and click **Save & Continue**.
+7. To use the React frontend, add the shortcode `[taxer_app]` to any page.
 
 **Manual installation:**
 
@@ -43,15 +50,15 @@ This plugin is ideal for businesses that need to store their company and VAT/TRN
 
 = Who can access the Tax Manager? =
 
-Only users with the `manage_options` capability (Administrators) can view or edit data in this plugin.
+Only users with the `manage_options` capability (Administrators) can view or modify data.
 
-= Where is my company data stored? =
+= Where is my data stored? =
 
-All data is stored in your WordPress database in a custom table (`wp_taxer_company`). No data is sent to any external server.
+All data is stored in your WordPress database in custom tables prefixed with `wp_taxer_`. No data is sent to any external server.
 
 = Is this plugin translation-ready? =
 
-Yes. All user-facing strings are wrapped in WordPress i18n functions and the text domain is `taxer`.
+Yes. All user-facing strings are wrapped in WordPress i18n functions with the text domain `taxer`.
 
 = Does this plugin work with multisite? =
 
@@ -59,21 +66,29 @@ The plugin has not been tested on WordPress Multisite. Single-site installations
 
 = What happens to my data if I deactivate the plugin? =
 
-Deactivating the plugin does not remove your data. The database table is preserved. If you wish to remove all data, delete the plugin entirely (a future version will include an optional uninstall cleanup).
+Deactivating the plugin does not remove your data. Tables are preserved on deactivation. Data is only removed when the plugin is fully deleted AND the company record has `company_data` set to `yes`.
+
+= How do I display the frontend? =
+
+Add the shortcode `[taxer_app]` to any WordPress page. The React-based frontend will be loaded automatically.
 
 == Screenshots ==
 
 1. Company setup screen — shown on first activation.
-2. Main dashboard — displays stored company details.
-3. Edit modal — update company details without leaving the page.
+2. Main dashboard — displays stored company and tax details.
+3. Stock management — add and manage your inventory.
+4. Purchase and sales entry with tax calculation.
+5. Full transaction report with input/output tax summary.
 
 == Changelog ==
 
 = 1.0.0 =
 * Initial release.
-* Company setup form with nonce-protected POST submission.
-* Dashboard view with AJAX-powered edit modal.
-* Secure input sanitisation and output escaping throughout.
+* Company setup with nonce-protected form submission.
+* Stock, Purchase, Sales, Receipt, Payment, and Contra management.
+* REST API with proper permission callbacks.
+* React frontend via shortcode.
+* Full transaction report with VAT input/output summary.
 
 == Upgrade Notice ==
 
@@ -82,4 +97,4 @@ Initial release — no upgrade steps required.
 
 == Privacy Policy ==
 
-Taxer does not collect, store, or transmit any personal data to external services. All data entered (company name, address, TRN) is stored locally in your WordPress database and is accessible only to site administrators.
+Taxer does not collect, store, or transmit any personal data to external services. All data entered (company name, address, TRN, transactions) is stored locally in your WordPress database and is accessible only to site administrators.

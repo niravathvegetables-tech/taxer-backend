@@ -1,6 +1,6 @@
 <?php
 /**
- * Receipt handler for Taxer plugin.
+ * Contra (Bank) handler for Taxer plugin.
  *
  * @package Taxer
  */
@@ -10,9 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class Receipt
+ * Class Taxer_Contra
  */
-class Contra {
+class Taxer_Contra {
 
 	/** @var Taxer_Model */
 	private $model;

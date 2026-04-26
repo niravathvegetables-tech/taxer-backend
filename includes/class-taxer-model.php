@@ -59,15 +59,15 @@ class Taxer_Model {
 	public function __construct( $wpdb ) {
 
 		$this->wpdb              = $wpdb;
-		$this->company_table     = $wpdb->prefix .'taxer_company';
-		$this->stocks_table      = $wpdb->prefix .'taxer_stocks';
-		$this->taxes_table       = $wpdb->prefix .'taxer_taxes';
-		$this->transaction_table = $wpdb->prefix .'taxer_transaction';
-		$this->purchase_table    = $wpdb->prefix .'taxer_purchase';
-		$this->receipt_table     = $wpdb->prefix .'taxer_receipt';
-		$this->payment_table     = $wpdb->prefix .'taxer_payment';
-		$this->contra_table     = $wpdb->prefix .'taxer_contra';
-		$this->sales_table     = $wpdb->prefix .'taxer_sales';
+		$this->company_table     = $wpdb->prefix . 'taxer_company';
+		$this->stocks_table      = $wpdb->prefix . 'taxer_stocks';
+		$this->taxes_table       = $wpdb->prefix . 'taxer_taxes';
+		$this->transaction_table = $wpdb->prefix . 'taxer_transaction';
+		$this->purchase_table    = $wpdb->prefix . 'taxer_purchase';
+		$this->receipt_table     = $wpdb->prefix . 'taxer_receipt';
+		$this->payment_table     = $wpdb->prefix . 'taxer_payment';
+		$this->contra_table     = $wpdb->prefix . 'taxer_contra';
+		$this->sales_table     = $wpdb->prefix . 'taxer_sales';
 
 	}
 

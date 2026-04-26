@@ -1,6 +1,6 @@
 <?php
 /**
- * Purchase handler for Taxer plugin.
+ * Sales handler for Taxer plugin.
  *
  * @package Taxer
  */
@@ -10,11 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class Purchase
- *
- * Handles purchase transaction REST requests.
+ * Class Sales
  */
-class Purchase {
+class Taxer_Sales {
 
 	/** @var Taxer_Model */
 	private $model;
@@ -36,13 +34,13 @@ class Purchase {
 		$this->wpdb  = $wpdb;
 	}
 
-	/**
-	 * REST: record a purchase (transaction + line items).
-	 *
-	 * @param WP_REST_Request $request Incoming request.
-	 * @return WP_REST_Response
-	 */
-	public function reactTaxPurchase( WP_REST_Request $request ) {
+
+
+
+
+
+
+	public function reactTaxSales( WP_REST_Request $request ) {
 
 		$company_id        = intval( $request->get_param( 'company_id' ) );
 		$transactionamount = sanitize_text_field( $request->get_param( 'sub_total' ) );
@@ -72,17 +70,17 @@ class Purchase {
 		}
 
 		// Handle both raw JSON string and already-decoded array.
-		$purchases_raw = $request->get_param( 'purchases' );
+		$salesses_raw = $request->get_param( 'saleses' );
 
-		$purchases     = is_array( $purchases_raw )
-			? $purchases_raw
-			: json_decode( $purchases_raw, true );
+		$saleses     = is_array( $salesses_raw )
+			? $salesses_raw
+			: json_decode( $salesses_raw, true );
 
-		if ( ! is_array( $purchases ) || empty( $purchases ) ) {
+		if ( ! is_array( $saleses ) || empty( $saleses ) ) {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => 'No valid purchases data',
+					'message' => 'No valid saleses data',
 				),
 				400
 			);
@@ -91,9 +89,9 @@ class Purchase {
 		$inserted_count = 0;
 		$errors         = array();
 
-		foreach ( $purchases as $row ) {
+		foreach ( $saleses as $row ) {
 
-			if ( empty( $row['stocks_id'] ) || empty( $row['purchase_amount'] ) ) {
+			if ( empty( $row['stocks_id'] ) || empty( $row['sales_amount'] ) ) {
 
 				$errors[] = 'Invalid row: ' . wp_json_encode( $row );
 
@@ -101,17 +99,17 @@ class Purchase {
 
 			}
 
-			$purchase_data = array(
+			$sales_data = array(
 				'transaction_id'     => intval( $transaction_id ),
 				'stocks_id'          => intval( $row['stocks_id'] ),
-				'purchase_amount'    => sanitize_text_field( $row['purchase_amount'] ),
-				'purchase_count'     => sanitize_text_field( $row['purchase_count'] ),
-				'purchase_item_type' => sanitize_text_field( $row['purchase_item_type'] ),
-				'purchase_total'     => sanitize_text_field( $row['purchase_total'] ),
+				'sales_amount'    => sanitize_text_field( $row['sales_amount'] ),
+				'sales_count'     => sanitize_text_field( $row['sales_count'] ),
+				'sales_item_type' => sanitize_text_field( $row['sales_item_type'] ),
+				'sales_total'     => sanitize_text_field( $row['sales_total'] ),
 				'date'               => $date,
 			);
 
-			$result = $this->model->purchase( $purchase_data, $row['stocks_id'], $row['purchase_count'] );
+			$result = $this->model->sales( $sales_data, $row['stocks_id'], $row['sales_count'] );
 
 			if ( $result ) {
 				$inserted_count++;
@@ -124,7 +122,7 @@ class Purchase {
 		$company = $this->model->get_company_by_idee($company_id);
 
 
-		$newcompanyamount=$company->company_amount-$total;
+		$newcompanyamount=$company->company_amount+$total;
 
 		 $this->model->update_company_amount( $newcompanyamount,$company_id );	
 
@@ -142,12 +140,11 @@ class Purchase {
 
 
 
-
-	public function GetPurchaseDetails(WP_REST_Request $request){
-
+		public function GetSalesDetails(WP_REST_Request $request){
 
 
-		$report = $this->model->get_purchase_report();
+
+		$report = $this->model->get_sales_report();
 
 		return rest_ensure_response(
 			array(
@@ -156,10 +153,6 @@ class Purchase {
 		);
 
 	}
-
-
-
-
 
 
 }
